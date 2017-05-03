@@ -30,7 +30,6 @@ def main():
 
     # Fire up the ann
     ocrArgs = [str(value) for argName, value in vars(args).iteritems()]
-    print(repr(ocrArgs))
 
 if __name__ == '__main__':
     main()
