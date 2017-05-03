@@ -1,33 +1,56 @@
 #!/usr/bin/python
 
 from PIL import Image
+import os
 
-def imageCrop(path, sideLen, highLo=None):
+def toSquare(path, sideLen, highLo=None):
     img = Image.open(path).convert('L')
     imgX, imgY = img.size
 
     pixels = img.load()
-    bounds = (0,0,0,0)
-    # upper bound
-    for y in range(imgY):
-        for x in range(imgX):
-            if pixels[x,y] == 0:
-                bounds[0] = y
 
-    # left bound
+    # high-pass/low-pass filter
+    if highLo:
+        for y in range(imgY):
+            for x in range(imgX):
+                if pixels[x,y] <= highLo:
+                    pixels[x,y] = 0
+                else:
+                    pixels[x,y] = 255
+
+    bounds = [-1,-1,-1,-1]
+    # start x, end x
     for x in range(imgX):
+        sawChar = False
         for y in range(imgY):
-            if pixels[x,y] == 0:
-                bounds[1] = x
+            if bounds[0] == -1:
+                if pixels[x,y] == 0:
+                    bounds[0] = x
+                    sawChar = True
+            else:
+                if pixels[x,y] == 0:
+                    sawChar = True
+                elif y == imgY-1 and not sawChar:
+                    bounds[2] = x-1
 
-    # lower bound
-    for y in reversed(range(imgY)):
+        if bounds[0] != -1 and not sawChar:
+            break
+
+    # start y, end y
+    for y in range(imgY):
+        sawChar = False
         for x in range(imgX):
-            if pixels[x,y] == 0:
-                bounds[2] = y
+            if bounds[1] == -1:
+                if pixels[x,y] == 0:
+                    bounds[1] = y
+                    sawChar = True
+            else:
+                if pixels[x,y] == 0:
+                    sawChar = True
+                elif x == imgX-1 and not sawChar:
+                    bounds[3] = y-1
 
-    # right bound
-    for x in reversed(range(imgX)):
-        for y in range(imgY):
-            if pixels[x,y] == 0:
-                bounds[3] = x
+        if bounds[1] != -1 and not sawChar:
+            break
+
+    return img.crop(tuple(bounds)).resize((sideLen,sideLen), Image.LANCZOS)
