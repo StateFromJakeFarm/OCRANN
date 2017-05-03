@@ -24,9 +24,9 @@ def main():
     args = parser.parse_args()
 
     # Create train in/out files
-#    trainIn, trainOut = createTrainFiles(args.train)
+    trainIn, trainOut = createTrainFiles(args.train)
     # Create test (read) in/out files
-#    testIn, testOut = createTestFiles(args.read)
+    testIn, testOut = createTestFiles(args.read)
 
     # Fire up the ann
     ocrArgs = [str(value) for argName, value in vars(args).iteritems()]

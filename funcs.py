@@ -65,3 +65,12 @@ def imageToInput(image, filePath):
 
     f.write('\n')
     f.close()
+
+def charOutIndex(char):
+    pass
+
+def createTrainFiles(rootFolder):
+    pass
+
+def createTestFiles(rootFolder):
+    pass
