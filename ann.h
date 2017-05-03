@@ -41,7 +41,7 @@ class ANN {
     void constructLayers(char*);
     void getWeights(char*);
     void randWeights();
-    void getDigitEncodings(char*);
+    void getCharEncodings(char*);
     void getIns(char*, vector< vector<long double> >&);
     void getOuts(char*, vector<int>&);
 

@@ -70,8 +70,7 @@ void ANN::randWeights() {
             // current node
             for(unsigned int i=0; i<layers[l+1].size(); i++) {
                 curWeight = 0.01;  // CHANGE THIS //
-                cout << curWeight << endl;
-                layers[l][n].weights.push_back(curWeight);
+                layers[l][n].weights.push_back(0.01);
             }
 
             ++numNeurons;
@@ -89,14 +88,14 @@ void ANN::randWeights() {
  *
  * @param fname A character pointer to the name of the 'encodings' file.
  **/
-void ANN::getDigitEncodings(char* fname) {
+void ANN::getCharEncodings(char* fname) {
     ifstream f(fname);
 
-    encodings.resize(10);
+    encodings.resize(62);
 
     long double curVal;
-    for(int d=0; d<10; d++) {
-        for(int i=0; i<10; i++) {
+    for(int d=0; d<62; d++) {
+        for(int i=0; i<62; i++) {
             f >> curVal;
             encodings[d].push_back(curVal);
         }
@@ -188,7 +187,7 @@ ANN::ANN(char* train_input, char* train_out, char* test_input, char* test_out, c
         getWeights(weights);
     else
         randWeights();
-    getDigitEncodings(encoding);
+    getCharEncodings(encoding);
     getOuts(train_out, trainOuts);
     getOuts(test_out, testOuts);
     getIns(train_input, trainIns);
@@ -289,26 +288,26 @@ void ANN::classify() {
         // Find Euclidean distance between output layer and all characters
         long double minDist = LONG_MAX;
         long double curDist;
-        int minDigit;
+        int minChar;
         int outputL = layers.size()-1;
         for(unsigned int c=0; c<62; c++) {
             curDist = 0;
-            for(unsigned int n=0; n<10; n++)
+            for(unsigned int n=0; n<62; n++)
                 curDist += pow(layers[outputL][n].a - encodings[c][n], 2);
             curDist = sqrt(curDist);
 
             // Current best guess
             if(curDist < minDist) {
                 minDist = curDist;
-                minDigit = c;
+                minChar = c;
             }
         }
 
         // Print our digit choice
-        cout << minDigit << endl;
+        cout << "I think it's: " << minChar << endl;
 
         // Keep track of how many we get right
-        if(minDigit == testOuts[xi])
+        if(minChar == testOuts[xi])
             ++numCorrect;
     }
 
@@ -323,9 +322,6 @@ void ANN::main() {
     // Iterations
     for(int i=0; i<k; i++)
         backPropogate();
-
-    // Print weights from first input neuron to next layer neurons
-    printWeights();
 
     // Classify the testing data
     classify();

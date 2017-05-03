@@ -3,11 +3,11 @@
 from funcs import *
 from PIL import Image
 import sys
+import os
+import argparse
 
 def main():
-    img = toSquare('ImgTests/a/img037-003.png', 10)
-    img.show()
-    imageToInput(img, 'lol')
+    parser = argparse.ArgumentParser(prog='ocr')
 
 
 if __name__ == '__main__':
