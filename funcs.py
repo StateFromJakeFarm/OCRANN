@@ -54,3 +54,13 @@ def toSquare(path, sideLen, highLo=None):
             break
 
     return img.crop(tuple(bounds)).resize((sideLen,sideLen), Image.LANCZOS)
+
+def imageToInput(image, filePath):
+    f = open(filePath, 'a')
+    for val in image.getdata():
+        if val == 255:
+            f.write('0.1 ')
+        else:
+            f.write('0.9 ')
+
+    f.close()
