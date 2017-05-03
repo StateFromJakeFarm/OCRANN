@@ -60,6 +60,30 @@ void ANN::getWeights(char* fname) {
         layers[0][0].weights.push_back(0.01);
 }
 
+void ANN::randWeights() {
+    int numNeurons = 0;
+    long double curWeight;
+    // loop through all layers except output layer
+    for(unsigned int l=1; l<layers.size()-1; l++) {
+        for(unsigned int n=0; n<layers[l].size(); n++) {
+            // for each node in next layer, add weight to vector for
+            // current node
+            for(unsigned int i=0; i<layers[l+1].size(); i++) {
+                curWeight = 0.01;  // CHANGE THIS //
+                cout << curWeight << endl;
+                layers[l][n].weights.push_back(curWeight);
+            }
+
+            ++numNeurons;
+        }
+    }
+
+    // Add dummy weights
+    layers[0].resize(1);
+    for(int i=layers[1].size(); i<numNeurons+layers[layers.size()-1].size(); i++)
+        layers[0][0].weights.push_back(0.01);
+}
+
 /**
  * Retrieve the 10-value digit encodings for all 10 digits.
  *
@@ -149,6 +173,8 @@ void ANN::printWeights() {
  * @param test_input A character pointer to the name of the 'test_input' file.
  * @param test_out A character pointer to the name of the 'test_outputs' file.
  * @param structure A character pointer to the name of the 'structure' file.
+ * @param weights A character pointer to the name of the 'weights' file OR
+ *        'RANDOM' to generate random starting weights
  * @param encoding A character pointer to the name of the 'encodings' file.
  * @param a A long double for the alpha.
  * @param numIters the number of iterations to run the backpropogation algo.
@@ -157,7 +183,11 @@ void ANN::printWeights() {
  **/
 ANN::ANN(char* train_input, char* train_out, char* test_input, char* test_out, char* structure, char* weights, char* encoding, long double a, int numIters): alpha(a), k(numIters) {
     constructLayers(structure);
-    getWeights(weights);
+
+    if(weights != "RANDOM")
+        getWeights(weights);
+    else
+        randWeights();
     getDigitEncodings(encoding);
     getOuts(train_out, trainOuts);
     getOuts(test_out, testOuts);
@@ -256,21 +286,21 @@ void ANN::classify() {
     for(unsigned int xi=0; xi<testIns.size(); xi++) {
         calcActivations(testIns[xi]);
 
-        // Find Euclidean distance between output layer and all digits
+        // Find Euclidean distance between output layer and all characters
         long double minDist = LONG_MAX;
         long double curDist;
         int minDigit;
         int outputL = layers.size()-1;
-        for(unsigned int d=0; d<10; d++) {
+        for(unsigned int c=0; c<62; c++) {
             curDist = 0;
             for(unsigned int n=0; n<10; n++)
-                curDist += pow(layers[outputL][n].a - encodings[d][n], 2);
+                curDist += pow(layers[outputL][n].a - encodings[c][n], 2);
             curDist = sqrt(curDist);
 
             // Current best guess
             if(curDist < minDist) {
                 minDist = curDist;
-                minDigit = d;
+                minDigit = c;
             }
         }
 

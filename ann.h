@@ -7,6 +7,7 @@
 #include <string>
 #include <cmath>
 #include <climits>
+#include <cstdlib>
 
 using namespace std;
 
@@ -39,6 +40,7 @@ class ANN {
     // Construct ANN and get input/output data sets
     void constructLayers(char*);
     void getWeights(char*);
+    void randWeights();
     void getDigitEncodings(char*);
     void getIns(char*, vector< vector<long double> >&);
     void getOuts(char*, vector<int>&);
