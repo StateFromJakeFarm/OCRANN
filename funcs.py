@@ -63,4 +63,5 @@ def imageToInput(image, filePath):
         else:
             f.write('0.9 ')
 
+    f.write('\n')
     f.close()

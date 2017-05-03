@@ -5,7 +5,7 @@ from PIL import Image
 import sys
 
 def main():
-    img = toSquare('ImgTests/a/img037-003.png', 32)
+    img = toSquare('ImgTests/a/img037-003.png', 10)
     img.show()
     imageToInput(img, 'lol')
 
