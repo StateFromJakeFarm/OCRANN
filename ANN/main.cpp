@@ -27,27 +27,22 @@ vector<long double> readSingleBMP(char* file);
 vector<int> readLabels(char* file);
 
 int main(int argc, char* argv[]) {
-  bool train = false;
-  bool test = false;
-  bool read = false;
-  bool save = false;
-
   char c;
   int num_options = 0;
 
   //Get where args appear in command string
-  int rIndex = argc; int tIndex = argc; int sIndex = argc; int dIndex = argc;
+  int rIndex = argc; int tIndex = argc; int sIndex = argc; int wIndex = argc; int pIndex = argc;
   for(int i=1; i<argc; i++) {
     if(argv[i][0] == '-') {
       char c = argv[i][1];
       if(c == 'r') {
-        rIndex = i; train = true;
+        rIndex = i;
       } else if(c == 't') {
-        tIndex = i; test = true;
+        tIndex = i;
       } else if(c == 's') {
-        sIndex = i; read = true;
-      } else if(c == 'd') {
-        dIndex = i; save = true;
+        sIndex = i;
+      } else if(c == 'w') {
+        wIndex = i;
       } else {
         cout << "ERROR: Unrecognized argument '" << argv[i] << "'" << endl;
         return -1;
@@ -55,10 +50,10 @@ int main(int argc, char* argv[]) {
     }
   }
 
-  if(train) cout << "Training" << endl;
-  if(test) cout << "Testing" << endl;
-  if(read) cout << "Reading" << endl;
-  if(save) cout << "Saving" << endl;
+  if(rIndex != argc) cout << "Training" << endl;
+  if(tIndex != argc) cout << "Testing" << endl;
+  if(wIndex != argc) cout << "Reading weights" << endl;
+  if(sIndex != argc) cout << "Saving" << endl;
 
 
   char* weight_file;
@@ -73,15 +68,18 @@ int main(int argc, char* argv[]) {
   //Output layer
   structure.push_back(LABEL_SIZE);
 
-  if(read) weight_file = "weights.txt";
-  else weight_file = NULL;
   labels = makeLabels();
   ANN picasso(structure, labels, weight_file);
 
+  // WEIGHTS
+  if(wIndex != argc) {
+    picasso.readWeights(argv[wIndex+1]);
+  }
+
+  // READ
   int num_image = 0;
-  //Read in all training data images
   //Training label is the first letter of the file name
-  for(int i=rIndex+1; argv[i][0]!='-' && i<argc; i++) {
+  for(int i=rIndex+1; i<argc && argv[i][0]!='-'; i++) {
     vector<long double> temp = readSingleBMP(argv[i]);
     //Finds first leter of the file name
     char l = -1;
@@ -100,10 +98,10 @@ int main(int argc, char* argv[]) {
     num_image++;
   }
   cout << "Processing " << num_image << " images." << endl;
-  if(train) picasso.train(ERROR, NUM_IT, training_input);
+  if(tIndex != argc) picasso.train(ERROR, NUM_IT, training_input);
 
-  // TESTING
-  for(int i=tIndex; argv[i][0]!='-' && i<argc; i++) {
+  // TEST
+  for(int i=tIndex+1; i<argc && argv[i][0]!='-'; i++) {
     vector<long double> temp = readSingleBMP(argv[i]);
     //Finds first leter of the file name
     char l = -1;
@@ -118,12 +116,12 @@ int main(int argc, char* argv[]) {
     temp.push_back(label);
     testing_input.push_back(temp);
   }
-  if(test) picasso.test(testing_input);
+  if(tIndex != argc) picasso.test(testing_input);
 
-  // SAVING
-  if(dIndex != argc) {
+  // SAVE
+  if(sIndex != argc) {
     //picasso.printNetwork();
-    if(save) picasso.saveWeights(argv[dIndex+1]);
+    picasso.saveWeights(argv[sIndex+1]);
   }
 
   //picasso.printNetwork();
