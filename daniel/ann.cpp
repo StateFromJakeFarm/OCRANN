@@ -2,11 +2,7 @@
 #include <iostream>
 #include <iomanip>
 #include <math.h>
-
 #include <stdlib.h>
-#include <time.h>
-
-#include <assert.h>
 
 using std::cout;
 using std::endl;
@@ -15,7 +11,7 @@ using std::fixed;
 using std::setprecision;
 
 ANN::Node::Node() {
-  srand(time(NULL));
+  srand(4);
   in = 0;
   out = 0;
   err = 0;
@@ -115,8 +111,8 @@ ANN::~ANN() {
 
 void ANN::train(long double error, int num_it, vector<vector<long double> > input) {
   for(int it = 0;it < num_it;it++) {
-    if(it % 100 == 0) cout << "Training Iteration #" << it << endl;
-    
+    if(it % (num_it / 20) == 0) cout << "Training Iteration #" << it << endl;
+
     for(int i = 0;i < (int)input.size();i++) {
       //Initialize input layer
       for(int j = 0;j < (int)nodes[0].size();j++) {
