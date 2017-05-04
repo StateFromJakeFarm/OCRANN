@@ -3,8 +3,10 @@
 from PIL import Image
 from os import listdir
 import os
-import re
+import sys
+import subprocess
 import shutil
+import glob
 
 def toSquare(path, newPath, sideLen, highLo=None):
     """Crop image to character and save as square bitmap"""
@@ -101,7 +103,6 @@ def fullImgBmps(rawPath, bmpFolder, sideLen, highLo):
                 pixels[x,y] = 0
             else:
                 pixels[x,y] = 255
-    img.show()
 
     bounds = [-1,0,imgX,imgY]
     i = 0
@@ -127,3 +128,17 @@ def clearFolder(folderPath):
     if os.path.isdir(folderPath):
         shutil.rmtree(folderPath)
     os.makedirs(folderPath)
+
+def runANN(argsList, giveString=False):
+    outString = ''
+    ann = subprocess.Popen(argsList, stdout=subprocess.PIPE)
+    while True:
+        out = ann.stdout.read(1)
+        if out == '' and ann.poll() != None:
+            break
+        if out != '':
+            if giveString:
+                outString += out
+            else:
+                sys.stdout.write(out)
+                sys.stdout.flush()
