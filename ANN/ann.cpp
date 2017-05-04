@@ -228,7 +228,7 @@ void ANN::test(vector<vector<long double> > input) {
   cout << showpoint << fixed << setprecision(12) << accuracy << endl;
 }
 
-int ANN::getChar(vector<long double> input) {
+char ANN::getChar(vector<long double> input) {
   //Set the input layer
   for(int k = 0;k < (int)nodes[0].size();k++) {
     nodes[0][k]->out = input[k];
@@ -261,7 +261,12 @@ int ANN::getChar(vector<long double> input) {
     output.push_back(n->out);
   }
 
-  return findLabel(output);
+  int label = findLabel(output);
+  if(label < 10)
+    return char(label);
+  if(label < 36)
+    return char(label + 55);
+  return char(label + 62);
 }
 
 //Finds closest label by Euclidean distance

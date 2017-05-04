@@ -16,7 +16,7 @@ using std::string;
 #define NUM_LABELS 62
 #define LABEL_SIZE 100
 #define BLOCK_SIZE 10
-#define ERROR 0.15
+#define ERROR 0.01
 #define NUM_IT 200
 
 vector<vector<long double>> makeLabels();
@@ -43,6 +43,8 @@ int main(int argc, char* argv[]) {
         sIndex = i;
       } else if(c == 'w') {
         wIndex = i;
+      } else if(c == 'p') {
+        pIndex = i;
       } else {
         cout << "ERROR: Unrecognized argument '" << argv[i] << "'" << endl;
         return -1;
@@ -77,7 +79,7 @@ int main(int argc, char* argv[]) {
       return -1;
   }
 
-  // READ
+  // TRAIN
   int num_image = 0;
   //Training label is the first letter of the file name
   for(int i=rIndex+1; i<argc && argv[i][0]!='-'; i++) {
@@ -99,7 +101,7 @@ int main(int argc, char* argv[]) {
     num_image++;
   }
   cout << "Processing " << num_image << " images." << endl;
-  if(tIndex != argc) picasso.train(ERROR, NUM_IT, training_input);
+  if(rIndex != argc) picasso.train(ERROR, NUM_IT, training_input);
 
   // TEST
   for(int i=tIndex+1; i<argc && argv[i][0]!='-'; i++) {
@@ -123,6 +125,12 @@ int main(int argc, char* argv[]) {
   if(sIndex != argc) {
     //picasso.printNetwork();
     picasso.saveWeights(argv[sIndex+1]);
+  }
+
+  // PRINT
+  for(int i=pIndex+1; i<argc && argv[i][0]!='-'; i++) {
+    vector<long double> temp = readSingleBMP(argv[i]);
+    cout << picasso.getChar(temp) << endl;
   }
 
   //picasso.printNetwork();
