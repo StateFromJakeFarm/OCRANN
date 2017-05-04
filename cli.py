@@ -21,9 +21,9 @@ def main():
         help='encodings file (default is \"62encodings.txt\"')
     parser.add_argument('-a', '--alpha', type=float, default=0.01,
         help='the alpha value (default is 0.01)')
-    parser.add_argument('-b', '--bmp', type=str,
+    parser.add_argument('-b', '--bmp', type=str, default=None,
         help='convert images in directory to bmps')
-    parser.add_argument('-l', '--len', type=int,
+    parser.add_argument('-l', '--len', type=int, default=None,
         help='length of side of bmp image')
     args = parser.parse_args()
 
@@ -32,7 +32,7 @@ def main():
             print('ERROR: need "--len"')
             exit(1)
 
-        createBmps(args.bmp, args.bmp+'Bmps', args.len)
+        createBmps(args.bmp, args.bmp.strip('/') + 'Bmps', args.len)
 
 if __name__ == '__main__':
     main()

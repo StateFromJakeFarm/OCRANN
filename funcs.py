@@ -61,12 +61,14 @@ def toSquare(path, newPath, sideLen, highLo=None):
 
 def createBmps(rawFolder, bmpFolder, sideLen):
     """Convert test images to bitmaps"""
-    if !os.path.isdir(bmpFolder):
+    if not os.path.isdir(bmpFolder):
         os.makedirs(bmpFolder)
 
     for char in listdir(rawFolder):
         i = 0
         for f in listdir(os.path.join(rawFolder, char)):
-            print('creating ' + os.path.join(bmpFolder, char+str(i)+'.bmp'))
-            toSquare(os.path.join(rawFolder, char, f), os.path.join(bmpFolder, char+str(i)+'.bmp'), sideLen)
+            rawPath = os.path.join(rawFolder, char, f)
+            bmpPath = os.path.join(bmpFolder, char+str(i)+'.bmp')
+            print(rawPath + ' --(' + str(sideLen) + ',' + str(sideLen) + ')-> ' + bmpPath)
+            toSquare(rawPath, bmpPath, sideLen)
             i += 1
