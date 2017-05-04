@@ -9,11 +9,11 @@ def main():
     parser = argparse.ArgumentParser(prog='ocr')
     parser.add_argument('-i', '--iters', type=int, default=300,
         help='number of training iterations to run over provided training set (default is 300)')
-    parser.add_argument('-t', '--train', type=str, required=True,
+    parser.add_argument('-t', '--train', type=str,
         help='folder with training inputs')
-    parser.add_argument('-r', '--read', type=str, required=True,
+    parser.add_argument('-r', '--read', type=str,
         help='folder with images to read')
-    parser.add_argument('-s', '--structure', type=str, required=True,
+    parser.add_argument('-s', '--structure', type=str,
         help='ANN structure file')
     parser.add_argument('-w', '--weights', type=str, default='RANDOM',
         help='starting weights file (default is random starting weights)')
@@ -21,15 +21,18 @@ def main():
         help='encodings file (default is \"62encodings.txt\"')
     parser.add_argument('-a', '--alpha', type=float, default=0.01,
         help='the alpha value (default is 0.01)')
+    parser.add_argument('-b', '--bmp', type=str,
+        help='convert images in directory to bmps')
+    parser.add_argument('-l', '--len', type=int,
+        help='length of side of bmp image')
     args = parser.parse_args()
 
-    # Create train in/out files
-    trainIn, trainOut = createTrainFiles(args.train)
-    # Create test (read) in/out files
-    testIn, testOut = createTestFiles(args.read)
+    if args.bmp:
+        if not args.len:
+            print('ERROR: need "--len"')
+            exit(1)
 
-    # Fire up the ann
-    ocrArgs = [str(value) for argName, value in vars(args).iteritems()]
+        createBmps(args.bmp, args.bmp+'Bmps', args.len)
 
 if __name__ == '__main__':
     main()

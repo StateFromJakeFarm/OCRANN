@@ -6,6 +6,7 @@ import os
 import re
 
 def toSquare(path, newPath, sideLen, highLo=None):
+    """Crop image to character and save as square bitmap"""
     img = Image.open(path).convert('L')
     imgX, imgY = img.size
 
@@ -58,29 +59,14 @@ def toSquare(path, newPath, sideLen, highLo=None):
     img = img.crop(tuple(bounds)).resize((sideLen,sideLen), Image.LANCZOS)
     img.convert('RGB').save(newPath)
 
-def createBmps(rawFolder, bmpFolder):
+def createBmps(rawFolder, bmpFolder, sideLen):
+    """Convert test images to bitmaps"""
+    if !os.path.isdir(bmpFolder):
+        os.makedirs(bmpFolder)
+
     for char in listdir(rawFolder):
         i = 0
         for f in listdir(os.path.join(rawFolder, char)):
-            print(os.path.join(bmpFolder, char+str(i)+'.bmp'))
-            toSquare(os.path.join(rawFolder, char, f), os.path.join(bmpFolder, char+str(i)+'.bmp'), 32)
+            print('creating ' + os.path.join(bmpFolder, char+str(i)+'.bmp'))
+            toSquare(os.path.join(rawFolder, char, f), os.path.join(bmpFolder, char+str(i)+'.bmp'), sideLen)
             i += 1
-
-def imageToInput(image, filePath):
-    f = open(filePath, 'a')
-    for val in image.getdata():
-        if val == 255:
-            f.write('0.1 ')
-        else:
-            f.write('0.9 ')
-
-    f.write('\n')
-    f.close()
-
-def charOutIndex(char):
-    if re.match('^[0-9]$', char):
-        return int(char)
-    elif re.match('^[A-Z]$', char):
-        return int(char) - 55
-    else:
-        return int(char) - 32
