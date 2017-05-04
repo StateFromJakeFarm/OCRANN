@@ -16,8 +16,8 @@ using std::string;
 #define NUM_LABELS 62
 #define LABEL_SIZE 100
 #define BLOCK_SIZE 10
-#define ERROR 0.15
-#define NUM_IT 200
+#define ERROR 0.25
+#define NUM_IT 400
 
 vector<vector<long double>> makeLabels();
 int mapLabel(char l);
