@@ -2,6 +2,7 @@
 #define ANN_H
 
 #include <vector>
+#include <cstdlib>
 
 using std::vector;
 

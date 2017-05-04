@@ -120,7 +120,10 @@ void ANN::train(long double error, int num_it, vector<vector<long double> > inpu
     if(it % (num_it / 20) == 0)
       cout << "Training Iteration #" << it << "/" << num_it << endl;
 
-    for(int i = 0;i < (int)input.size();i++) {
+    vector< vector<long double> > temp = input;
+    while(temp.size() > 0) {
+      int i = rand() % temp.size();
+
       //Initialize input layer
       for(int j = 0;j < (int)nodes[0].size();j++) {
         Node* n = nodes[0][j];
@@ -173,6 +176,8 @@ void ANN::train(long double error, int num_it, vector<vector<long double> > inpu
           if(j != 0) n->from[0]->w = n->from[0]->w + error * n->err;
         }
       }
+
+      temp.erase(temp.begin() + i);
     }//end of i
   }//end of it
 
