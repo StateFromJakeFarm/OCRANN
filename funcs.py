@@ -1,9 +1,11 @@
 #!/usr/bin/python
 
 from PIL import Image
+from os import listdir
 import os
+import re
 
-def toSquare(path, sideLen, highLo=None):
+def toSquare(path, newPath, sideLen, highLo=None):
     img = Image.open(path).convert('L')
     imgX, imgY = img.size
 
@@ -53,7 +55,16 @@ def toSquare(path, sideLen, highLo=None):
         if bounds[1] != -1 and not sawChar:
             break
 
-    return img.crop(tuple(bounds)).resize((sideLen,sideLen), Image.LANCZOS)
+    img = img.crop(tuple(bounds)).resize((sideLen,sideLen), Image.LANCZOS)
+    img.convert('RGB').save(newPath)
+
+def createBmps(rawFolder, bmpFolder):
+    for char in listdir(rawFolder):
+        i = 0
+        for f in listdir(os.path.join(rawFolder, char)):
+            print(os.path.join(bmpFolder, char+str(i)+'.bmp'))
+            toSquare(os.path.join(rawFolder, char, f), os.path.join(bmpFolder, char+str(i)+'.bmp'), 32)
+            i += 1
 
 def imageToInput(image, filePath):
     f = open(filePath, 'a')
@@ -67,10 +78,9 @@ def imageToInput(image, filePath):
     f.close()
 
 def charOutIndex(char):
-    pass
-
-def createTrainFiles(rootFolder):
-    pass
-
-def createTestFiles(rootFolder):
-    pass
+    if re.match('^[0-9]$', char):
+        return int(char)
+    elif re.match('^[A-Z]$', char):
+        return int(char) - 55
+    else:
+        return int(char) - 32
