@@ -73,7 +73,8 @@ int main(int argc, char* argv[]) {
 
   // WEIGHTS
   if(wIndex != argc) {
-    picasso.readWeights(argv[wIndex+1]);
+    if(!picasso.readWeights(argv[wIndex+1]))
+      return -1;
   }
 
   // READ
