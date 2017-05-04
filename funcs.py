@@ -7,7 +7,12 @@ import re
 
 def toSquare(path, newPath, sideLen, highLo=None):
     """Crop image to character and save as square bitmap"""
-    img = Image.open(path).convert('L')
+    img = None
+    if type(path) == 'str':
+        img = Image.open(path).convert('L')
+    else:
+        img = path
+
     imgX, imgY = img.size
 
     pixels = img.load()
@@ -73,10 +78,30 @@ def createBmps(rawFolder, bmpFolder, sideLen):
             toSquare(rawPath, bmpPath, sideLen)
             i += 1
 
-def prepareRealImage(rawPath, bmpFolder, sideLen):
+def fullImgBmps(rawPath, bmpFolder, sideLen, highLo=40):
     if not os.path.isdir(bmpfolder):
         os.makedirs(bmpFolder)
 
     img = Image.open(rawPath)
     imgX, imgY = img.size
     pixels = img.load()
+
+    for y in range(imgY):
+        for x in range(imgX):
+            if pixels[x,y] <= highLo:
+                pixels[x,y] = 0
+            else:
+                pixels[x,y] = 255
+
+    bounds = [-1,0,imgX,imgY]
+    for x in range(imgX):
+        for y in range(imgY):
+            if bounds[0] == -1:
+                if pixels[x,y] == 0:
+                    bounds[0] = x
+            else:
+                if pixels[x,y] == 255:
+                    bounds[2] = x
+
+                    toSquare(img.crop(tuple(bounds)), bmpFolder, sideLen)
+                    bounds = [-1,0,imgX,imgY]

@@ -23,16 +23,16 @@ def main():
         help='the alpha value (default is 0.01)')
     parser.add_argument('-b', '--bmp', type=str, default=None,
         help='convert images in directory to bmps')
-    parser.add_argument('-l', '--len', type=int, default=None,
-        help='length of side of bmp image')
+    parser.add_argument('-l', '--len', type=int, default=10,
+        help='length of side of bmp image (default is 10)')
     args = parser.parse_args()
 
     if args.bmp:
-        if not args.len:
-            print('ERROR: need "--len"')
-            exit(1)
-
         createBmps(args.bmp, args.bmp.strip('/') + 'Bmps', args.len)
+
+    if args.read:
+        fullImgBmps(args.read, args.read.split('.')[0] + 'Bmps', args.len)
+
 
 if __name__ == '__main__':
     main()
