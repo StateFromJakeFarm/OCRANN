@@ -130,15 +130,23 @@ def clearFolder(folderPath):
     os.makedirs(folderPath)
 
 def runANN(argsList, giveString=False):
-    outString = ''
     ann = subprocess.Popen(argsList, stdout=subprocess.PIPE)
+    outStr = ''
+    curStr = ''
     while True:
         out = ann.stdout.read(1)
         if out == '' and ann.poll() != None:
             break
         if out != '':
             if giveString:
-                outString += out
+                if str(out) == '\n' or str(out) == '\0':
+                    if len(curStr) == 1:
+                        outStr += str(curStr)
+                    curStr = ''
+                else:
+                    curStr += str(out)
             else:
                 sys.stdout.write(out)
                 sys.stdout.flush()
+
+    return outStr
