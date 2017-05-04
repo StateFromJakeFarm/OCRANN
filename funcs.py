@@ -77,8 +77,7 @@ def toSquare(path, newPath, sideLen, highLo=None):
 
 def createBmps(rawFolder, bmpFolder, sideLen):
     """Convert test images to bitmaps"""
-    if not os.path.isdir(bmpFolder):
-        os.makedirs(bmpFolder)
+    clearFolder(bmpFolder)
 
     for char in listdir(rawFolder):
         i = 0
@@ -90,9 +89,7 @@ def createBmps(rawFolder, bmpFolder, sideLen):
             i += 1
 
 def fullImgBmps(rawPath, bmpFolder, sideLen, highLo):
-    if os.path.isdir(bmpFolder):
-        shutil.rmtree(bmpFolder)
-    os.makedirs(bmpFolder)
+    clearFolder(bmpFolder)
 
     img = Image.open(rawPath).convert('L')
     imgX, imgY = img.size
@@ -126,4 +123,7 @@ def fullImgBmps(rawPath, bmpFolder, sideLen, highLo):
             toSquare(img.crop(tuple(bounds)), os.path.join(bmpFolder, str(i) + '.bmp'), sideLen)
             bounds = [-1,0,imgX,imgY]
 
-
+def clearFolder(folderPath):
+    if os.path.isdir(folderPath):
+        shutil.rmtree(folderPath)
+    os.makedirs(folderPath)
