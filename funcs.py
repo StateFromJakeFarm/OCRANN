@@ -89,7 +89,7 @@ def createBmps(rawFolder, bmpFolder, sideLen):
             toSquare(rawPath, bmpPath, sideLen)
             i += 1
 
-def fullImgBmps(rawPath, bmpFolder, sideLen, highLo=58):
+def fullImgBmps(rawPath, bmpFolder, sideLen, highLo):
     if os.path.isdir(bmpFolder):
         shutil.rmtree(bmpFolder)
     os.makedirs(bmpFolder)
