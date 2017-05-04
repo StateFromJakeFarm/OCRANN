@@ -28,7 +28,7 @@ private:
     long double w;
   public:
     Edge();
-    Edge(Node*, long double, Node* b);
+    Edge(Node*, long double, Node*);
   };
 private:
   int num_nodes;
@@ -38,7 +38,7 @@ private:
 public:
   //structure, weights, labels
   //ANN(vector<int>, vector<vector<long double> >, vector<vector<long double> >);
-  ANN(vector<int>, vector<vector<long double> >);
+  ANN(vector<int>, vector<vector<long double> >, char*);
   ~ANN();
 public:
   //error, num_it, data
@@ -46,6 +46,9 @@ public:
   void test(vector<vector<long double> >);
   int findLabel(vector<long double>);
   void printNetwork();
+public:
+  bool saveWeights(char* file);
+  bool readWeights(char* file);
 };
 
 #endif
