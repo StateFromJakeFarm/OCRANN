@@ -72,3 +72,11 @@ def createBmps(rawFolder, bmpFolder, sideLen):
             print(rawPath + ' --(' + str(sideLen) + ',' + str(sideLen) + ')-> ' + bmpPath)
             toSquare(rawPath, bmpPath, sideLen)
             i += 1
+
+def prepareRealImage(rawPath, bmpFolder, sideLen):
+    if not os.path.isdir(bmpfolder):
+        os.makedirs(bmpFolder)
+
+    img = Image.open(rawPath)
+    imgX, imgY = img.size
+    pixels = img.load()
