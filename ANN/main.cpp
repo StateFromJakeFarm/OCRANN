@@ -16,8 +16,6 @@ using std::string;
 #define NUM_LABELS 62
 #define LABEL_SIZE 100
 #define BLOCK_SIZE 10
-#define ERROR 0.01
-#define NUM_IT 200
 
 vector<vector<long double>> makeLabels();
 int mapLabel(char l);
@@ -29,6 +27,10 @@ vector<int> readLabels(char* file);
 int main(int argc, char* argv[]) {
   char c;
   int num_options = 0;
+
+  //Default arg values
+  int numIt = 200;
+  long double error = 0.01;
 
   //Get where args appear in command string
   int rIndex = argc; int tIndex = argc; int sIndex = argc; int wIndex = argc; int pIndex = argc;
@@ -45,6 +47,10 @@ int main(int argc, char* argv[]) {
         wIndex = i;
       } else if(c == 'p') {
         pIndex = i;
+      } else if(c == 'n') {
+        numIt = atoi(argv[i+1]);
+      } else if(c == 'e') {
+        error = atoi(argv[i+1]);
       } else {
         cout << "ERROR: Unrecognized argument '" << argv[i] << "'" << endl;
         return -1;
@@ -101,7 +107,7 @@ int main(int argc, char* argv[]) {
     num_image++;
   }
   cout << "Processing " << num_image << " images." << endl;
-  if(rIndex != argc) picasso.train(ERROR, NUM_IT, training_input);
+  if(rIndex != argc) picasso.train(error, numIt, training_input);
 
   // TEST
   for(int i=tIndex+1; i<argc && argv[i][0]!='-'; i++) {
