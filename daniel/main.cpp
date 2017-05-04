@@ -1,8 +1,7 @@
 #include <iostream> //cout
 #include <fstream>  //ifstream, ofstream
 #include <vector>   //vector
-#include <stdlib.h>
-#include <time.h>
+#include <string>   //string
 #include "ann.h"
 
 using std::cout;
@@ -11,12 +10,13 @@ using std::fstream;
 using std::ifstream;
 using std::ofstream;
 using std::vector;
+using std::string;
 
 #define NUM_LABELS 62
-#define LABEL_SIZE 100
-#define BLOCK_SIZE 10
+#define LABEL_SIZE 400
+#define BLOCK_SIZE 32
 #define ERROR 0.25
-#define NUM_IT 1000
+#define NUM_IT 400
 
 vector<vector<long double>> makeLabels();
 int mapLabel(char l);
@@ -26,35 +26,54 @@ vector<long double> readSingleBMP(char* file);
 vector<int> readLabels(char* file);
 
 int main(int argc, char* argv[]) {
-  for(char c = '0';c <= '9';c++) cout << c << " " << mapLabel(c) << endl;
-  for(char c = 'A';c <= 'Z';c++) cout << c << " " << mapLabel(c) << endl;
-  for(char c = 'a';c <= 'z';c++) cout << c << " " << mapLabel(c) << endl;
-
+  /*
   if(argc < 5) {
     cout << "Error: Not enough arguments." << endl;
     cout << "<train.bmp> <train.lbl> <test.bmp> <test.lbl>" << endl;
     return -1;
   }
+  */
 
   vector<int> structure;
   vector<vector<long double>> labels;
   vector<vector<long double>> training_input, testing_input;
-  vector<int> training_label, testing_label;
 
   //Input layer
   structure.push_back(BLOCK_SIZE * BLOCK_SIZE);
   //Hidden layers
-  structure.push_back(150);
+  structure.push_back((BLOCK_SIZE*BLOCK_SIZE)*1.2);
   //Output layer
   structure.push_back(LABEL_SIZE);
 
   labels = makeLabels();
   ANN picasso(structure, labels);
 
+  for(int i = 1;i < argc-1;i++) {
+    vector<long double> temp = readSingleBMP(argv[i]);
+
+    char l = -1;
+    for(int j = 0;;j++) {
+      char c = argv[i][j];
+      if(c == '\0') break;
+      if(c == '/') l = argv[i][j+1];
+    }
+
+    if(l == -1) {cout << "UHOH" << endl; return -2;}
+    int label = mapLabel(l);
+    temp.push_back(label);
+    training_input.push_back(temp);
+
+    cout << argv[i] << " " << l << "," << label << endl;
+  }
+
+  picasso.train(ERROR, NUM_IT, training_input);
+  picasso.test(training_input);
+
+/*
   training_input = readBMP(argv[1]);
   training_label = readLabels(argv[2]);
 
-  /****TRAINING****************************************************************/
+  //TRAINING
   if((int)training_input.size() == 0 || (int)training_label.size() == 0) return -1;
 
   //Append label to end of training_input
@@ -64,16 +83,15 @@ int main(int argc, char* argv[]) {
 
   picasso.train(ERROR, NUM_IT, training_input);
 
-  /****TESTING*****************************************************************/
+  //TESTING
   testing_input = readBMP(argv[3]);
   testing_label = readLabels(argv[4]);
   for(int i = 0;i < (int)testing_input.size();i++) {
     testing_input[i].push_back(testing_label[i]);
   }
 
-
-
   picasso.test(testing_input);
+  */
 
   return 0;
 }
@@ -129,7 +147,7 @@ vector<vector<long double>> readBMP(char* file) {
   //Bits per pixel
   //int k = info[28];
 
-  cout << width << "x" << height << endl;
+  //cout << width << "x" << height << endl;
   //cout << k << " bits per pixel." << endl;
   //cout << k/8 <<  " bytes per pixel." << endl;
 
@@ -182,7 +200,7 @@ vector<long double> readSingleBMP(char* file) {
   //Bits per pixel
   //int k = info[28];
 
-  cout << width << "x" << height << endl;
+  //cout << width << "x" << height << endl;
   if(width != BLOCK_SIZE || height != BLOCK_SIZE) cout << "WARNING! Image resolution different than accepted." << endl;
   //cout << k << " bits per pixel." << endl;
   //cout << k/8 <<  " bytes per pixel." << endl;
