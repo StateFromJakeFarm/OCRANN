@@ -1,5 +1,6 @@
 #include "ann.h"
 #include <iostream>
+#include <fstream>
 #include <iomanip>
 #include <math.h>
 #include <stdlib.h>
@@ -9,6 +10,9 @@ using std::endl;
 using std::showpoint;
 using std::fixed;
 using std::setprecision;
+using std::fstream;
+using std::ofstream;
+using std::ifstream;
 
 ANN::Node::Node() {
   srand(4);
@@ -42,7 +46,7 @@ ANN::Edge::Edge(Node* a, long double w, Node* b) {
 /******************************************************************************/
 
 //ANN::ANN(vector<int> structure, vector<vector<long double> > weights, vector<vector<long double> > encoding) {
-ANN::ANN(vector<int> structure, vector<vector<long double> > encoding) {
+ANN::ANN(vector<int> structure, vector<vector<long double> > encoding, char* wfile) {
   //Create nodes
   num_nodes = 0;
   for(int i = 0;i < (int)structure.size();i++) {
@@ -59,39 +63,41 @@ ANN::ANN(vector<int> structure, vector<vector<long double> > encoding) {
     }
   }
 
-  //set weights for each edge
-  int w = 0;
-  //For each layer of nodes except for output
-  for(int i = 0;i < (int)nodes.size();i++) {
-    //For each node in that layer
-    for(int j = 0;j < (int)nodes[i].size();j++) {
-      Node* a = nodes[i][j];
-      //If not input layer
-      if(i != 0) {
-        //Add dummy weight
-        nodes[i][j]->from.push_back(new Edge(NULL,0.01,a));
-        //For each node in the previous layer
-        for(int k = 0;k < (int)nodes[i-1].size();k++) {
-          Node* n = nodes[i-1][k];
-          nodes[i][j]->from.push_back(n->to[j]);
-          //nodes[i][j]->from.push_back(new Edge(n, weight));
+  if(wfile == NULL) {
+    //set weights for each edge
+    int w = 0;
+    //For each layer of nodes
+    for(int i = 0;i < (int)nodes.size();i++) {
+      //For each node in that layer
+      for(int j = 0;j < (int)nodes[i].size();j++) {
+        Node* a = nodes[i][j];
+        //If not input layer
+        if(i != 0) {
+          //Add dummy weight
+          nodes[i][j]->from.push_back(new Edge(NULL,0.01,a));
+          //For each node in the previous layer
+          for(int k = 0;k < (int)nodes[i-1].size();k++) {
+            Node* n = nodes[i-1][k];
+            nodes[i][j]->from.push_back(n->to[j]);
+            //nodes[i][j]->from.push_back(new Edge(n, weight));
+          }
         }
-      }
-      //If not output layer
-      if(i != (int)nodes.size()-1) {
-        //For each node in the next layer
-        for(int k = 0;k < (int)nodes[i+1].size();k++) {
-          Node* n = nodes[i+1][k];
-          //long double weight = weights[w][k];
-          int temp = rand() % 10;
-          long double weight = temp / 100.0;
-          nodes[i][j]->to.push_back(new Edge(a, weight, n));
+        //If not output layer
+        if(i != (int)nodes.size()-1) {
+          //For each node in the next layer
+          for(int k = 0;k < (int)nodes[i+1].size();k++) {
+            Node* n = nodes[i+1][k];
+            //long double weight = weights[w][k];
+            int temp = rand() % 10;
+            long double weight = temp / 100.0;
+            nodes[i][j]->to.push_back(new Edge(a, weight, n));
+          }
         }
+        //Next node
+        w++;
       }
-      //Next node
-      w++;
     }
-  }
+  }else readWeights(wfile);
 
   //Read in labels
   labels = encoding;
@@ -111,7 +117,8 @@ ANN::~ANN() {
 
 void ANN::train(long double error, int num_it, vector<vector<long double> > input) {
   for(int it = 0;it < num_it;it++) {
-    if(it % (num_it / 20) == 0) cout << "Training Iteration #" << it << endl;
+    if(it % (num_it / 20) == 0)
+      cout << "Training Iteration #" << it << "/" << num_it << endl;
 
     for(int i = 0;i < (int)input.size();i++) {
       //Initialize input layer
@@ -149,11 +156,6 @@ void ANN::train(long double error, int num_it, vector<vector<long double> > inpu
         output.push_back(n->out);
       }
 
-      //int label = findLabel(output);
-      //cout << label << " - " << goal << endl;
-
-      //Adjust goal label to more closely resemble output
-
       //Propagate errors backwards and update weights
       for(int j = output_layer-1;j >= 0;j--) {
         for(int k = 0;k < (int)nodes[j].size();k++) {
@@ -173,15 +175,6 @@ void ANN::train(long double error, int num_it, vector<vector<long double> > inpu
       }
     }//end of i
   }//end of it
-
-/*
-  Node* n = nodes[0][0];
-  for(int e = 0;e < (int)n->to.size();e++) {
-    Edge* z = n->to[e];
-    cout << showpoint << fixed << setprecision(12) << z->w << " ";
-  }
-  cout << endl;
-  */
 
   //printNetwork();
 }
@@ -293,4 +286,62 @@ void ANN::printNetwork() {
     }
     cout << endl;
   }
+}
+
+//Save weights each node recieves
+bool ANN::saveWeights(char* file) {
+  ofstream oFile;
+  oFile.open(file);
+
+  if(!oFile.is_open()) {
+    cout << "Error: Could not open file '" << file << "' for writing." << endl;
+    return false;
+  }
+  //For every layer in nodes except input layer
+  for(int i = 1;i < (int)nodes.size();i++) {
+    //For every node in that layer
+    for(int j = 0;j < (int)nodes[i].size();j++) {
+      Node* n = nodes[i][j];
+      for(int k = 0;k < (int)n->from.size();k++) {
+        oFile << n->from[k]->w << " ";
+      }
+      oFile << endl;
+    }
+  }
+
+  oFile.close();
+  return true;
+}
+
+bool ANN::readWeights(char* file) {
+  ifstream iFile;
+  iFile.open(file);
+
+  if(!iFile.is_open()) {
+    cout << "Error: Could not open file '" << file << "' for reading." << endl;
+    return false;
+  }
+
+  //For every layer of nodes except the input layer
+  for(int i = 1;i < (int)nodes.size();i++) {
+    //For every node in that layer
+    for(int j = 0;j < (int)nodes[i].size();j++) {
+      Node* n = nodes[i][j];
+      long double weight;
+
+      iFile >> weight;
+      n->from.push_back(new Edge(NULL, weight, n));
+      for(int k = 0;k < (int)nodes[i-1].size();k++) {
+        Node* f = nodes[i-1][k];
+        iFile >> weight;
+
+        Edge* e = new Edge(f, weight, n);
+        f->to.push_back(e);
+        n->from.push_back(e);
+      }
+    }
+  }
+
+  iFile.close();
+  return true;
 }

@@ -2,6 +2,7 @@
 #include <fstream>  //ifstream, ofstream
 #include <vector>   //vector
 #include <string>   //string
+#include <unistd.h> //getopt
 #include "ann.h"
 
 using std::cout;
@@ -13,10 +14,10 @@ using std::vector;
 using std::string;
 
 #define NUM_LABELS 62
-#define LABEL_SIZE 400
-#define BLOCK_SIZE 32
-#define ERROR 0.25
-#define NUM_IT 400
+#define LABEL_SIZE 100
+#define BLOCK_SIZE 10
+#define ERROR 0.15
+#define NUM_IT 200
 
 vector<vector<long double>> makeLabels();
 int mapLabel(char l);
@@ -26,14 +27,41 @@ vector<long double> readSingleBMP(char* file);
 vector<int> readLabels(char* file);
 
 int main(int argc, char* argv[]) {
-  /*
-  if(argc < 5) {
-    cout << "Error: Not enough arguments." << endl;
-    cout << "<train.bmp> <train.lbl> <test.bmp> <test.lbl>" << endl;
-    return -1;
-  }
-  */
+  bool train = false;
+  bool test = false;
+  bool read = false;
+  bool save = false;
 
+  char c;
+  int num_options = 0;
+
+  while((c = getopt(argc, argv, "drst")) != EOF) {
+    switch(c) {
+      case 'r': //train
+        train = true;
+        break;
+      case 't': //test
+        test = true;
+        break;
+      case 's': //save weights
+        save = true;
+        break;
+      case 'd': //read from weights
+        read = true;
+        break;
+      default:
+        break;
+    }
+    num_options++;
+  }
+
+  if(train) cout << "Training" << endl;
+  if(test) cout << "Testing" << endl;
+  if(read) cout << "Reading" << endl;
+  if(save) cout << "Saving" << endl;
+
+
+  char* weight_file;
   vector<int> structure;
   vector<vector<long double>> labels;
   vector<vector<long double>> training_input, testing_input;
@@ -41,16 +69,21 @@ int main(int argc, char* argv[]) {
   //Input layer
   structure.push_back(BLOCK_SIZE * BLOCK_SIZE);
   //Hidden layers
-  structure.push_back((BLOCK_SIZE*BLOCK_SIZE)*1.2);
+  structure.push_back((BLOCK_SIZE*BLOCK_SIZE)*1.5);
   //Output layer
   structure.push_back(LABEL_SIZE);
 
+  if(read) weight_file = "weights.txt";
+  else weight_file = NULL;
   labels = makeLabels();
-  ANN picasso(structure, labels);
+  ANN picasso(structure, labels, weight_file);
 
-  for(int i = 1;i < argc-1;i++) {
+  int num_image = 0;
+  //Read in all training data images
+  //Training label is the first letter of the file name
+  for(int i = 2;i < argc;i++) {
     vector<long double> temp = readSingleBMP(argv[i]);
-
+    //Finds first leter of the file name
     char l = -1;
     for(int j = 0;;j++) {
       char c = argv[i][j];
@@ -64,35 +97,17 @@ int main(int argc, char* argv[]) {
     training_input.push_back(temp);
 
     cout << argv[i] << " " << l << "," << label << endl;
+    num_image++;
   }
+  cout << "Processing " << num_image << " images." << endl;
 
-  picasso.train(ERROR, NUM_IT, training_input);
-  picasso.test(training_input);
+  if(train) picasso.train(ERROR, NUM_IT, training_input);
+  if(test) picasso.test(training_input);
 
-/*
-  training_input = readBMP(argv[1]);
-  training_label = readLabels(argv[2]);
+  //picasso.printNetwork();
+  if(save) picasso.saveWeights("weights.txt");
 
-  //TRAINING
-  if((int)training_input.size() == 0 || (int)training_label.size() == 0) return -1;
-
-  //Append label to end of training_input
-  for(int i = 0;i < (int)training_input.size();i++) {
-    training_input[i].push_back(training_label[i]);
-  }
-
-  picasso.train(ERROR, NUM_IT, training_input);
-
-  //TESTING
-  testing_input = readBMP(argv[3]);
-  testing_label = readLabels(argv[4]);
-  for(int i = 0;i < (int)testing_input.size();i++) {
-    testing_input[i].push_back(testing_label[i]);
-  }
-
-  picasso.test(testing_input);
-  */
-
+  //picasso.printNetwork();
   return 0;
 }
 
@@ -104,10 +119,6 @@ vector<vector<long double>> makeLabels() {
       int mod = NUM_LABELS;
       if((i+j) % mod == 0) ret[i].push_back(0.9);
       else ret[i].push_back(0.1);
-      /*
-      if(j == i) ret[i].push_back(0.9);
-      else ret[i].push_back(0.1);
-      */
     }
   }
 
@@ -201,10 +212,12 @@ vector<long double> readSingleBMP(char* file) {
   //int k = info[28];
 
   //cout << width << "x" << height << endl;
-  if(width != BLOCK_SIZE || height != BLOCK_SIZE) cout << "WARNING! Image resolution different than accepted." << endl;
+  if(width != BLOCK_SIZE || height != BLOCK_SIZE)
+    cout << "WARNING! Image resolution different than accepted in file '" << file << "'." << endl;
   //cout << k << " bits per pixel." << endl;
   //cout << k/8 <<  " bytes per pixel." << endl;
-
+width = BLOCK_SIZE;
+height = BLOCK_SIZE;
   //Start at bottom-left corner
   for(int i = height-1;i >= 0;i--) {
     for(int j = 0;j < width;j++) {
