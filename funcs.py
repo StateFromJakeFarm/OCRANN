@@ -104,6 +104,8 @@ def fullImgBmps(rawPath, bmpFolder, sideLen, highLo):
             else:
                 pixels[x,y] = 255
 
+    img.show()
+
     bounds = [-1,0,imgX,imgY]
     i = 0
     for x in range(imgX):
