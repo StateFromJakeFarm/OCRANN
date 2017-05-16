@@ -90,7 +90,7 @@ def createBmps(rawFolder, bmpFolder, sideLen):
             toSquare(rawPath, bmpPath, sideLen)
             i += 1
 
-def fullImgBmps(rawPath, bmpFolder, sideLen, highLo):
+def fullImgBmp(rawPath, bmpFolder, sideLen, highLo):
     clearFolder(bmpFolder)
 
     img = Image.open(rawPath).convert('L')
@@ -103,8 +103,6 @@ def fullImgBmps(rawPath, bmpFolder, sideLen, highLo):
                 pixels[x,y] = 0
             else:
                 pixels[x,y] = 255
-
-    img.show()
 
     bounds = [-1,0,imgX,imgY]
     i = 0

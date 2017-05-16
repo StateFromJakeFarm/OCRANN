@@ -2,7 +2,6 @@
 #define ANN_H
 
 #include <vector>
-#include <cstdlib>
 
 using std::vector;
 
@@ -44,8 +43,8 @@ public:
 public:
   //error, num_it, data
   void train(long double, int, vector<vector<long double> >);
-  void test(vector<vector<long double> >);
-  char getChar(vector<long double>);
+  //void test(vector<vector<long double> >);
+  vector<int> test(vector<vector<long double> >);
   int findLabel(vector<long double>);
   void printNetwork();
 public:

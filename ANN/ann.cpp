@@ -120,10 +120,7 @@ void ANN::train(long double error, int num_it, vector<vector<long double> > inpu
     if(it % (num_it / 20) == 0)
       cout << "Training Iteration #" << it << "/" << num_it << endl;
 
-    vector< vector<long double> > temp = input;
-    while(temp.size() > 0) {
-      int i = rand() % temp.size();
-
+    for(int i = 0;i < (int)input.size();i++) {
       //Initialize input layer
       for(int j = 0;j < (int)nodes[0].size();j++) {
         Node* n = nodes[0][j];
@@ -176,14 +173,13 @@ void ANN::train(long double error, int num_it, vector<vector<long double> > inpu
           if(j != 0) n->from[0]->w = n->from[0]->w + error * n->err;
         }
       }
-
-      temp.erase(temp.begin() + i);
     }//end of i
   }//end of it
 
   //printNetwork();
 }
 
+/*
 void ANN::test(vector<vector<long double> > input) {
   int num_tested = 0;
   int num_correct = 0;
@@ -232,46 +228,60 @@ void ANN::test(vector<vector<long double> > input) {
   double accuracy = 1.0 * num_correct / num_tested;
   cout << showpoint << fixed << setprecision(12) << accuracy << endl;
 }
+*/
 
-char ANN::getChar(vector<long double> input) {
-  //Set the input layer
-  for(int k = 0;k < (int)nodes[0].size();k++) {
-    nodes[0][k]->out = input[k];
-  }
+vector<int> ANN::test(vector<vector<long double> > input) {
+  vector<int> ret;
 
-  //For every layer up to output
-  for(int j = 1;j < (int)nodes.size();j++) {
-    //For every node in that layer
-    for(int k = 0;k < (int)nodes[j].size();k++) {
-      Node* n = nodes[j][k];
-
-      //Read input from previous layer
-      n->in = 0;
-      vector<Edge*> from = n->from;
-      for(int l = 0;l < (int)from.size();l++) {
-        if(l == 0) n->in += from[0]->w;
-        else n->in += from[l]->w * from[l]->a->out;
-      }
-      n->out = 1.0/(1.0 + exp(-1 * n->in));
+  int num_tested = 0;
+  int num_correct = 0;
+  //For every record in input
+  for(int i = 0;i < (int)input.size();i++) {
+    //Set the input layer
+    for(int k = 0;k < (int)nodes[0].size();k++) {
+      nodes[0][k]->out = input[i][k];
     }
-  }//end of layers, j
 
-  //Collect output
-  vector<long double> output;
-  int output_layer = nodes.size()-1;
+    //For every layer up to output
+    for(int j = 1;j < (int)nodes.size();j++) {
+      //For every node in that layer
+      for(int k = 0;k < (int)nodes[j].size();k++) {
+        Node* n = nodes[j][k];
 
-  //For the output layer
-  for(int j = 0;j < (int)nodes[output_layer].size();j++) {
-    Node* n = nodes[output_layer][j];
-    output.push_back(n->out);
-  }
+        //Read input from previous layer
+        n->in = 0;
+        vector<Edge*> from = n->from;
+        for(int l = 0;l < (int)from.size();l++) {
+          if(l == 0) n->in += from[0]->w;
+          else n->in += from[l]->w * from[l]->a->out;
+        }
+        n->out = 1.0/(1.0 + exp(-1 * n->in));
+      }
+    }//end of layers, j
 
-  int label = findLabel(output);
-  if(label < 10)
-    return char(label);
-  if(label < 36)
-    return char(label + 55);
-  return char(label + 62);
+    //Collect output
+    vector<long double> output;
+    int output_layer = nodes.size()-1;
+    int goal = input[i][input[i].size()-1];
+
+    //For the output layer
+    for(int j = 0;j < (int)nodes[output_layer].size();j++) {
+      Node* n = nodes[output_layer][j];
+      output.push_back(n->out);
+    }
+
+    int label = findLabel(output);
+    cout << label << " - " << goal << endl;
+    ret.push_back(label);
+
+    if(label == goal) num_correct++;
+    num_tested++;
+  }//end of input, i
+
+  double accuracy = 1.0 * num_correct / num_tested;
+  cout << showpoint << fixed << setprecision(12) << accuracy << endl;
+
+  return ret;
 }
 
 //Finds closest label by Euclidean distance
